@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Survey form</title>
+    <style>
+        body {
+            background: linear-gradient(to right, rgba(0, 255, 255, 0.589), black, black, black, rgba(0, 255, 255, 0.548));
+
+        }
+
+        header {
+            text-align: center;
+            color: cyan;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 0;
+        }
+
+        #description {
+            font-weight: 300;
+        }
+
+        main {
+            margin: auto;
+            background-color: rgb(36, 34, 34);
+            width: 720px;
+            border-radius: 10px;
+        }
+
+        @media (max-width: 576px) {
+            main {
+                max-width: 540px;
+            }
+        }
+
+        form {
+            padding: 15px;
+            color: cyan;
+            font-size: 1.2em;
+            line-height: 1.2em;;
+        }
+
+        label {
+            display: block;
+        }
+
+        input {
+            margin-top: 0.5em;
+            margin-bottom: 2em;                     
+        }
+
+        div input{
+            width: 90%;
+            padding-bottom: 7px;
+            padding-top: 7px;
+            border-radius: 5px;
+            display: block;
+            
+        }
+        p{
+            margin-top: 1.7em;
+            margin-bottom: 0.5em;            
+        }
+
+        select {
+            padding: 5px;
+            width: 50%
+        }
+        textarea {
+            width: 100%;
+            padding-bottom: 20%;
+            margin-bottom: 2em;
+        }
+        button {
+            padding: 7px;
+            width: 70%;
+            background-color: cyan;
+            border: none;
+            font-weight: 600;
+        }
+        .collapse {
+            margin-top: 0.5em;
+        }
+        #submit {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;            
+        }
+       
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1 id="title">Survey form</h1>
+        <p id="description">Thank you for taking the time to help us improve the platform</p>
+    </header>
+    <main><hr>
+        <form action="#" id="survey-form">
+
+            <div>
+                <label for="name" id="name-label">Name:</label>
+                <input type="text" name="name" id="name" placeholder="Name" required>
+                <label for="email" id="email-label">Email:</label>
+                <input type="email" name="email" id="email" placeholder="Email" required>
+                <label for="number" id="number-label">Age:</label>
+                <input type="number" name="age" id="number" min="14" max="100" placeholder="Age">                
+            </div>
+            <p>Which option best describes your current role?</p>
+            <select name="profession" id="dropdown">
+                <option value disabled selected>Select current profession</option>
+                <option value="student">Student</option>
+                <option value="parttimejob">Part time job</option>
+                <option value="job">Full time job</option>
+                <option value="none">Prefer not to say</option>
+            </select>
+
+            <p>Would you recommend freeCodeCamp to a friend?</p>
+            <label><input type="radio" name="recommend" value="yes" checked>Definitely</label>
+            <label><input type="radio" name="recommend" value="maybe">May be</label>
+            <label><input type="radio" name="recommend" value="notsure">Not sure</label>
+
+            <p class="collapse">What would you like to see improved?</p>
+            <label><input name="prefer" value="front-end-projects" type="checkbox" />Front-end
+                Projects</label>
+            <label>
+                <input name="prefer" value="back-end-projects" type="checkbox" />Back-end
+                Projects</label>
+            <label><input name="prefer" value="data-visualization" type="checkbox" />Data
+                Visualization</label>
+            <label><input name="prefer" value="challenges" type="checkbox" />Challenges</label>
+            <label><input name="prefer" value="forum" type="checkbox" />Forum</label>
+            <label><input name="prefer" value="additional-courses" type="checkbox" />Additional Courses</label>
+
+            <p class="collapse">Any comments or suggestions?</p>
+            <textarea name="feedback" id="feedback" placeholder="Enter your feedback here"></textarea>
+                
+            <div id="submit"><button type="submit">Submit</button></div>
+
+
+        </form>
+    </main>
+</body>
+
+</html>
