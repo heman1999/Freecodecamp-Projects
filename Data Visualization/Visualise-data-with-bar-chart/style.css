@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #708090;
+  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+}
+
+.container {
+  background-color: white;
+  width: max-content;
+  min-width: 1000px;
+  height: 100vh;
+  margin: 0 auto;
+  padding: 30px 60px;
+  box-shadow: 1px 1px 20px;
+}
+
+.bar {
+  fill: #33adff;
+}
+
+.overlay {
+  fill: rgb(0, 0, 0);
+}
+#title {
+  fill: black;
+  font-size: 3em;
+}
+#tooltip {
+  width: max-content;
+  position: absolute;
+  padding: 5px;
+  text-align: center;
+  fill: black;
+  font-size: 16px;
+  background-color: lightsteelblue;
+  border-radius: 2px;
+}
