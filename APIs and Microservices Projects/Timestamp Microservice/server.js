@@ -29,13 +29,13 @@ app.get("/api/timestamp/:date_string?", (req, res) => {
 
   if (!inputDate) {
     res.send({ unix: new Date().getTime(), utc: new Date().toUTCString() });
-  } else if (!isNaN(inputDate)) {
+  } else if (Number(inputDate)) {
     inputDate = parseInt(inputDate);
     res.send({ unix: inputDate, utc: new Date(inputDate).toUTCString() });
   } else {
     inputDate = new Date(inputDate);
-    if (inputDate !== "Invalid Date") {
-      res.send({ unix: inputDate.valueOf(), utc: inputDate });
+    if (inputDate != "Invalid Date") {
+      res.send({ unix: inputDate.valueOf(), utc: inputDate.toUTCString() });
     } else {
       res.send({ error: "Invalid Date" });
     }
