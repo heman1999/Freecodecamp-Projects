@@ -25,10 +25,10 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get("/api/whoami", (req, res) => {
-  res.send({
-    ipadress: req.ip,
-    laguage: req.header("accept-language"),
-    sofware: req.header("user-agent"),
+  res.json({
+    ipaddress: req.headers["x-forwarded-for"].split(",")[0],
+    language: req.headers["accept-language"].split(",")[0],
+    software: req.headers["user-agent"].split(/[\(\)]/)[1],
   });
 });
 
