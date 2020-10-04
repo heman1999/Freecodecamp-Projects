@@ -1,7 +1,6 @@
 var mongoose = require("mongoose");
-
-var url =
-  "mongodb+srv://user:user123@cluster0.pqdut.mongodb.net/url?retryWrites=true&w=majority";
+require("dotenv").config();
+var url = process.env.MONGO_URL;
 
 mongoose.connect(url, { useNewUrlParser: true, useUnifiedTopology: true });
 
