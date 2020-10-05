@@ -1,66 +1,184 @@
-var express = require("express");
+const express = require("express");
+const app = express();
 const bodyParser = require("body-parser");
-var URL = require("./db/db");
-var dns = require("dns");
-var cors = require("cors");
+
+const cors = require("cors");
+
+const mongodb = require("mongodb");
 const mongoose = require("mongoose");
-var validUrl = require("valid-url");
 
-var app = express();
-
-// Basic Configuration
-var port = process.env.PORT || 3000;
-
-/** this project needs a db !! **/
-// mongoose.connect(process.env.DB_URI);
-
-app.use(cors());
-app.use(
-  bodyParser.urlencoded({
-    extended: false,
-  })
-);
-/** this project needs to parse POST bodies **/
-// you should mount the body-parser here
-
-app.use("/public", express.static(process.cwd() + "/public"));
-
-app.get("/", function (req, res) {
-  res.sendFile(process.cwd() + "/views/index.html");
+mongoose.connect(process.env.MONGO_URL, {
+  useNewUrlParser: true,
+  useFindAndModify: false,
+  useCreateIndex: true,
+  useUnifiedTopology: true,
 });
 
-app.post("/api/shorturl/new", async (req, res) => {
-  const url = req.body.url;
-  if (validUrl.isUri(url)) {
-    while (true) {
-      console.log("Trying...");
-      let tempShorturl = Math.floor(Math.random() * 10000);
-      let shorturl = await URL.findOne({ shorturl: tempShorturl });
-      if (!shorturl) {
-        const data = new URL({ url, shorturl: tempShorturl });
-        await data.save();
-        return res.send({ url, shorturl: tempShorturl });
+//FreeCodeCamp's validation
+app.use(cors());
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
+app.use(express.static("public"));
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/views/index.html");
+});
+
+//Create User Schema
+const Schema = mongoose.Schema;
+const exerciseUsers = new Schema({
+  username: { type: String, required: true },
+  exercise: [
+    {
+      _id: false,
+      description: {
+        type: String,
+        required: true,
+      },
+      duration: {
+        type: Number,
+        required: true,
+      },
+      date: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+});
+
+//Convert User Schema into a Model
+const ExerciseUsers = mongoose.model("ExerciseUsers", exerciseUsers);
+
+//Create New User
+const createUser = (username, done) => {
+  ExerciseUsers.create({ username: username }, (err, data) => {
+    if (err) done(err);
+    done(null, data);
+  });
+};
+
+//Post New User
+app.post("/api/exercise/new-user", (req, res) => {
+  let username = req.body.username;
+  createUser(username, (err, data) => {
+    err
+      ? res.send("Error")
+      : res.send({ username: data.username, _id: data._id });
+  });
+});
+
+//Get all users
+app.get("/api/exercise/users", (req, res) => {
+  ExerciseUsers.find({})
+    .select("username _id")
+    .exec((err, data) => {
+      if (err) console.log(err);
+      res.send(data);
+    });
+});
+
+///Add Exercise v2.
+app.post("/api/exercise/add", (req, res) => {
+  let { userId, description, duration } = req.body;
+
+  ExerciseUsers.findOneAndUpdate(
+    { _id: userId },
+    {
+      $push: {
+        exercise: {
+          description: description,
+          duration: Number(duration),
+          date: req.body.date
+            ? new Date(req.body.date).toDateString()
+            : new Date().toDateString(),
+        },
+      },
+    },
+    { new: true },
+    (err, data) => {
+      if (data == null) {
+        res.json("Please make sure all camps were introduced correctly");
+      } else {
+        res.send({
+          _id: data._id,
+          description: description,
+          duration: Number(duration),
+          date: req.body.date
+            ? new Date(req.body.date).toDateString()
+            : new Date().toDateString(),
+          username: data.username,
+        });
       }
     }
+  );
+});
+
+//Retrieve users exercise data
+app.get("/api/exercise/log", (req, res) => {
+  //Define variables from url and apply logic
+  let userId = req.query.userId;
+  let from = req.query.from !== undefined ? new Date(req.query.from) : null;
+  let to = req.query.to !== undefined ? new Date(req.query.to) : null;
+  let limit = parseInt(req.query.limit);
+
+  ExerciseUsers.findOne({ _id: userId }, (err, data) => {
+    let count = data.exercise.length;
+
+    if (data == null) {
+      res.send("User not found");
+    } else {
+      if (from && to) {
+        res.send({
+          _id: userId,
+          username: data.username,
+          count: limit || count,
+          log: data.exercise
+            .filter((e) => e.date >= from && e.date <= to)
+            .slice(0, limit || count),
+        });
+      } else {
+        res.send({
+          _id: userId,
+          username: data.username,
+          count: limit || count,
+          log: data.exercise.slice(0, limit || count),
+        });
+      }
+    }
+  });
+});
+
+const deleteAllDocs = () => {
+  ExerciseUsers.remove({}, (err, data) => {
+    if (err) console.log(err);
+    console.log("All users were deleted");
+  });
+};
+// Not found middleware
+app.use((req, res, next) => {
+  return next({ status: 404, message: "not found" });
+});
+
+// Error Handling middleware
+app.use((err, req, res, next) => {
+  let errCode, errMessage;
+
+  if (err.errors) {
+    // mongoose validation error
+    errCode = 400; // bad request
+    const keys = Object.keys(err.errors);
+    // report the first validation error
+    errMessage = err.errors[keys[0]].message;
   } else {
-    res.send({ error: "Invalid url!" });
+    // generic or custom error
+    errCode = err.status || 500;
+    errMessage = err.message || "Internal Server Error";
   }
+  res.status(errCode).type("txt").send(errMessage);
 });
 
-app.get("/*", async (req, res) => {
-  const shorturl = req.params[0];
-  const data = await URL.findOne({ shorturl });
-  if (data) {
-    return res.redirect(data.url);
-  }
-  res.send({ error: "The short url doesnt exist!" });
-});
-
-// your first API endpoint...
-app.get("/api/hello", function (req, res) {
-  res.json({ greeting: "hello API" });
-});
-
-app.listen(port, function () {
-  console.log("Node.js listening on port " + port);
+const listener = app.listen(process.env.PORT || 3000, () => {
+  console.log("Your app is listening on port " + listener.address().port);
 });
